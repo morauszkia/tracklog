@@ -1,0 +1,24 @@
+[project]
+name = "tracklog"
+version = "0.1.0"
+description = "A CLI app to log runs, cycle rides, hikes, etc."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    { name = "András Morauszki", email = "morauszki.andras@gmail.com" }
+]
+dependencies = [
+    "click>=8.3.1",
+    "gpxpy>=1.6.2",
+    "pydantic>=2.12.5",
+    "rich>=14.3.2",
+    "sqlalchemy>=2.0.46",
+]
+
+[project.scripts]
+tracklog = "tracklog.cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
