@@ -1,5 +1,11 @@
-.env
+# folders: venv, cache, temporary
 .venv
 __pycache__
-files
 temp
+
+# sensitive info
+.env
+
+# raw data & db
+*.db
+files
