@@ -1,6 +1,6 @@
 # TrackLog - Run Logger
 
-TrackLog is a command-line tool written in Python that can be used to log outdoor sport activities, primarily running, cycling and hiking. It is currently under construction. It is designed to scale from CLI to web API.
+TrackLog is a command-line tool written in Python to log outdoor sport activities, primarily runs, rides and hikes from GPX files. Built with modern Python practices, clean architecture, and designed to be easily scaled from CLI to web API.
 
 ## MVP Features
 

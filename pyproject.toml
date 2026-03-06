@@ -12,8 +12,9 @@ dependencies = [
     "click>=8.3.1",
     "gpxpy>=1.6.2",
     "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
     "rich>=14.3.2",
-    "sqlalchemy>=2.0.46",
+    "sqlalchemy>=2.0.48",
 ]
 
 [project.scripts]
