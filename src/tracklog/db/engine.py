@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
+from tracklog.db.models import Base
 
 load_dotenv()
 db_path = os.environ.get("DB_PATH")
@@ -12,13 +12,5 @@ if not db_path:
 engine = create_engine(db_path, echo=True)
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-def create_db():
+def create_tables():
     Base.metadata.create_all(engine)
-
-
-if __name__ == "__main__":
-    create_db()
