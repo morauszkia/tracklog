@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from tracklog.db.models import Base
 
 load_dotenv()
@@ -10,6 +11,8 @@ if not db_path:
     raise ValueError("DB_PATH environment variable is required")
 
 engine = create_engine(db_path, echo=True)
+
+Session = sessionmaker(bind=engine)
 
 
 def create_tables():
