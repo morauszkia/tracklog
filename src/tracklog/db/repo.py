@@ -19,9 +19,9 @@ class WorkoutRepo:
         session = self.session_maker()
         stmt = select(Workout)
         results = session.execute(stmt)
-        for workout in results.all():
-            print(workout)
+        workouts = [w for w in results]
         session.close()
+        return workouts
 
     def reset(self):
         raise NotImplementedError()
