@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 class Workout(Base):
     __tablename__ = "workouts"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid7)
     type: Mapped[str]
     datetime: Mapped[datetime.datetime]
     start_lat: Mapped[float]

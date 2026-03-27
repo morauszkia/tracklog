@@ -3,7 +3,7 @@ name = "tracklog"
 version = "0.1.0"
 description = "A CLI app to log runs, cycle rides, hikes, etc."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 license = {text = "MIT"}
 authors = [
     { name = "András Morauszki", email = "morauszki.andras@gmail.com" }
