@@ -15,11 +15,11 @@ class WorkoutRepo:
         finally:
             session.close()
 
-    def list_all(self):
+    def list_all(self) -> list[Workout]:
         session = self.session_maker()
-        stmt = select(Workout)
-        results = session.execute(stmt)
-        workouts = [w for w in results]
+        stmt = select(Workout).order_by(Workout.datetime.desc())
+        results = session.scalars(stmt)
+        workouts = [w for w in results.all()]
         session.close()
         return workouts
 
