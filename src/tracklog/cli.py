@@ -18,13 +18,14 @@ DEFAULT_ICON = "🤸‍♀️"
 
 @click.group()
 def cli():
+    """Workout Tracker"""
     pass
 
 
 @cli.command("log")
 @click.argument("path")
 def log(path: Path):
-    """Log workout from GPX file or folder containing GPX files"""
+    """Log workout(s) from GPX file or folder containing GPX files"""
     path = Path(path)
     if not path.exists():
         click.echo(f"❌ path {path} does not exist")
@@ -54,13 +55,22 @@ def init_database():
 
 
 @cli.command()
-def list():
+@click.option(
+    "--limit",
+    "-l",
+    default=None,
+    help="Number of workouts to show",
+    type=click.IntRange(1),
+)
+def list(limit: int):
     """List recent workouts"""
     repo = WorkoutRepo(Session)
-    workouts = repo.list_all()
+    workouts = repo.list_all(limit)
 
     if not workouts:
-        click.echo("No workouts logged yet.")
+        click.echo(
+            "No workouts logged yet. Try logging some with 'tracklog log'"
+        )
         return
 
     click.echo("Your recent workouts:\n")
@@ -75,6 +85,24 @@ def list():
                 seconds=round(workout.moving_time_sec)
                 )}"
         )
+    click.echo(f"{len(workouts)} workouts listed")
+
+
+@cli.command()
+@click.option(
+    "--period",
+    "-p",
+    type=click.Choice(["week", "month", "ytd", "all"]),
+    default="all",
+    help="Stats period",
+)
+def stats(period):
+    """Calculate statistics for provided PERIOD"""
+    repo = WorkoutRepo(Session)
+    stats = repo.stats(period)
+    for key, val in stats.items():
+        print(f"{key}: {val}")
 
 
 # command to inspect workout
+# command to compare workouts
