@@ -98,10 +98,13 @@ def list(limit: int):
 )
 def stats(period):
     """Calculate statistics for provided PERIOD"""
+    # TODO: Create Rich tables
     repo = WorkoutRepo(Session)
     stats = repo.stats(period)
-    for key, val in stats.items():
-        print(f"{key}: {val}")
+    for item in stats:
+        print(f"==={item["type"].upper()}===")
+        for key, val in item.items():
+            print(f"{key}: {val}")
 
 
 # command to inspect workout
