@@ -9,3 +9,6 @@ temp
 # raw data & db
 *.db
 files
+
+# notes
+todo.md

@@ -84,6 +84,7 @@ def list(limit: int):
             f"in {datetime.timedelta(
                 seconds=round(workout.moving_time_sec)
                 )}"
+            f"(ID: {workout.id})"
         )
     click.echo(f"{len(workouts)} workouts listed")
 
@@ -98,14 +99,37 @@ def list(limit: int):
 )
 def stats(period):
     """Calculate statistics for provided PERIOD"""
-    # TODO: Create Rich tables
     repo = WorkoutRepo(Session)
     stats = repo.stats(period)
     for item in stats:
-        print(f"==={item["type"].upper()}===")
+        click.echo(f"==={item["type"].upper()}===")
         for key, val in item.items():
-            print(f"{key}: {val}")
+            click.echo(f"{key}: {val}")
 
 
-# command to inspect workout
-# command to compare workouts
+@cli.command()
+@click.argument("id")
+def show(id: str):
+    repo = WorkoutRepo(Session)
+    workout = repo.get_workout(id)
+    workout_icon = WORKOUT_ICONS.get(workout.type, DEFAULT_ICON)
+    click.echo("Workout details")
+    click.echo(f"Id: {workout.id}")
+    click.echo(f"Sport: {workout.type} {workout_icon}")
+    click.echo(f"Date: {workout.datetime.date().strftime("%Y-%m-%d (%a)")}")
+    click.echo(
+        f"Start coordinates: {round(workout.start_lat, 1)},"
+        f" {round(workout.start_lon, 1)}"
+    )
+    click.echo(f"Start time: {workout.datetime.time().strftime("%H:%M")}")
+    click.echo(
+        f"Moving time: {datetime.timedelta(seconds=workout.moving_time_sec)}"
+    )
+    click.echo(f"Distance: {workout.distance_km}km")
+    click.echo(f"Elevation: {workout.elevation_m}m (grade: {workout.grade}%)")
+    if workout.type == ["cycling", "Canoeing"]:
+        click.echo(f"Average speed: 60 / {round(workout.pace_min_km, 1)}")
+    else:
+        click.echo(
+            f"Average pace: {datetime.timedelta(minutes=workout.pace_min_km)}"
+        )

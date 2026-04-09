@@ -31,10 +31,11 @@ class WorkoutRepo:
         session.close()
         return workouts
 
-    def get_workout(self, id: uuid.uuid7) -> Workout:
+    def get_workout(self, id: str) -> Workout:
         """Find workout by id."""
+        parsed_id = uuid.UUID(id)
         session = self.session_maker()
-        stmt = select(Workout).where(Workout.id == id)
+        stmt = select(Workout).where(Workout.id == parsed_id)
         result = session.scalar(stmt)
         return result
 
@@ -96,7 +97,6 @@ class WorkoutRepo:
             session.close()
 
     def _get_period_cutoff(self, period: str) -> datetime.date:
-        # TODO: use SQL Functions (sqlite, postgresql)
         tod = datetime.date.today()
         start_date = datetime.date(1900, 1, 1)
         if period == "week":
