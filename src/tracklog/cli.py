@@ -4,6 +4,9 @@ from pathlib import Path
 from tracklog.db.engine import create_tables, Session
 from tracklog.db.repo import WorkoutRepo
 from tracklog.core.gpx_parser import parse_gpx, process_dir
+from rich.console import Console
+from rich.table import Table
+from rich import box
 
 WORKOUT_ICONS = {
     "running": "🏃",
@@ -73,19 +76,30 @@ def list(limit: int):
         )
         return
 
-    click.echo("Your recent workouts:\n")
+    console = Console()
+    table = Table(title="YOUR WORKOUTS", box=box.ROUNDED)
+    table.add_column("📅")
+    table.add_column("🕒")
+    table.add_column("Activity")
+    table.add_column("Distance")
+    table.add_column("Elevation")
+    table.add_column("Time")
+    table.add_column("ID")
 
     for workout in workouts:
         workout_icon = WORKOUT_ICONS.get(workout.type, DEFAULT_ICON)
-        click.echo(
-            f"{workout.datetime.strftime('📅 %Y-%m-%d (%a) 🕒 %H:%M')}: "
-            f"{workout_icon} {workout.type}: {workout.distance_km:.1f}km "
-            f"({workout.elevation_m}m+) "
-            f"in {datetime.timedelta(
+        table.add_row(
+            f"{workout.datetime.strftime('%Y-%m-%d (%a)')}",
+            f"{workout.datetime.strftime('%H:%M')}",
+            f"{workout_icon} {workout.type}",
+            f"{workout.distance_km:.1f}km",
+            f"{workout.elevation_m}m",
+            f"{datetime.timedelta(
                 seconds=round(workout.moving_time_sec)
-                )}"
-            f"(ID: {workout.id})"
+                )}",
+            f"{workout.id}",
         )
+    console.print(table)
     click.echo(f"{len(workouts)} workouts listed")
 
 
@@ -101,10 +115,31 @@ def stats(period):
     """Calculate statistics for provided PERIOD"""
     repo = WorkoutRepo(Session)
     stats = repo.stats(period)
-    for item in stats:
-        click.echo(f"==={item["type"].upper()}===")
-        for key, val in item.items():
-            click.echo(f"{key}: {val}")
+
+    console = Console()
+    table = Table(
+        title=f"STATS FOR PERIOD: {period.upper()}",
+        box=box.ROUNDED,
+    )
+    table.add_column("Sport")
+    table.add_column("Workouts")
+    table.add_column("Distance")
+    table.add_column("Time")
+    table.add_column("Elevation")
+    table.add_column("Avg. Pace")
+    table.add_column("Avg. Grade")
+    for sport in stats:
+        table.add_row(
+            sport["type"],
+            f"{sport["workout_count"]}",
+            f"{sport["total_dist_km"]:.1f} km",
+            str(datetime.timedelta(seconds=sport["total_time"])),
+            f"{sport["total_elevation_m"]} m",
+            str(datetime.timedelta(minutes=sport["avg_pace_min_km"])),
+            f"{sport["avg_grade_pct"]:.2f}%",
+        )
+
+    console.print(table)
 
 
 @cli.command()
