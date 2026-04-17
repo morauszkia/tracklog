@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-tracklog = "tracklog.cli:cli"
+tracklog = "tracklog.main:cli"
 
 [build-system]
 requires = ["hatchling"]
