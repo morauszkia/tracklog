@@ -1,13 +1,12 @@
 import click
-from pathlib import Path
 from tracklog.db.engine import create_tables, Session
 from tracklog.db.repo import WorkoutRepo
-from tracklog.core.gpx_parser import parse_gpx, process_dir
 from tracklog.cli.render import (
     render_workout_list,
     render_workout_details,
     render_stats_table,
 )
+from tracklog.cli.log import log_workout_from_file
 
 
 @click.group()
@@ -16,36 +15,18 @@ def cli():
     pass
 
 
-@cli.command("log")
-@click.argument("path")
-def log(path: str):
-    """Log workout(s) from GPX file or folder containing GPX files"""
-    path = Path(path)
-    if not path.exists():
-        click.echo(f"❌ path {path} does not exist")
-        return
-
-    workouts = []
-    if path.is_dir():
-        workouts.extend(process_dir(path))
-    elif path.is_file and path.suffix == ".gpx":
-        workouts.append(parse_gpx(path))
-    else:
-        click.echo(f"❌ invalid path: {path}")
-        return
-
-    repo = WorkoutRepo(Session)
-    for workout in workouts:
-        repo.add(workout)
-
-    click.echo(f"{len(workouts)} workouts logged successfully")
-
-
 @cli.command("init-db")
 def init_database():
     """Initialize database"""
     create_tables()
     click.echo("Database created")
+
+
+@cli.command("log")
+@click.argument("path")
+def log(path: str):
+    """Log workout(s) from GPX file or folder containing GPX files"""
+    log_workout_from_file(path)
 
 
 @cli.command()
