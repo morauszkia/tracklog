@@ -1,8 +1,10 @@
-import click
 import datetime as dt
 from typing import List, Dict
 from rich.console import Console
 from rich.table import Table
+from rich.panel import Panel
+from rich.columns import Columns
+from rich.text import Text
 from rich import box
 from tracklog.db.models import Workout
 
@@ -17,7 +19,14 @@ WORKOUT_ICONS = {
 DEFAULT_ICON = "🤸‍♀️"
 
 
-def render_workout_list(workouts: List[Workout]):
+def format_pace(pace_min: float):
+    seconds = int(pace_min * 60)
+    minutes = seconds // 60
+    seconds = minutes % 60
+    return f"{minutes}:{seconds:02d}"
+
+
+def render_workout_list(workouts: List[Workout]) -> None:
     console = Console()
     table = Table(title="YOUR WORKOUTS", box=box.ROUNDED)
     table.add_column("📅")
@@ -44,7 +53,7 @@ def render_workout_list(workouts: List[Workout]):
     console.print(table)
 
 
-def render_stats_table(stats: List[Dict], period: str):
+def render_stats_table(stats: List[Dict], period: str) -> None:
     console = Console()
     table = Table(
         title=f"STATS FOR PERIOD: {period.upper()}",
@@ -55,39 +64,65 @@ def render_stats_table(stats: List[Dict], period: str):
     table.add_column("Distance")
     table.add_column("Time")
     table.add_column("Elevation")
-    table.add_column("Avg. Pace")
     table.add_column("Avg. Grade")
+    table.add_column("Avg. Pace / Speed")
     for sport in stats:
+        pace = sport["avg_pace_min_km"]
+        perf_value = (
+            format_pace(pace)
+            if sport["type"] == "running"
+            else round(60 / pace, 1)
+        )
+        perf_metric = "min/km" if sport["type"] == "running" else "km/h"
+
         table.add_row(
             sport["type"],
             f"{sport["workout_count"]}",
             f"{sport["total_dist_km"]:.1f} km",
             str(dt.timedelta(seconds=sport["total_time"])),
             f"{sport["total_elevation_m"]} m",
-            str(dt.timedelta(minutes=sport["avg_pace_min_km"])),
-            f"{sport["avg_grade_pct"]:.2f}%",
+            f"{sport["avg_grade_pct"]:.2f} %",
+            f"{perf_value} {perf_metric}",
         )
 
     console.print(table)
 
 
-def render_workout_details(workout: Workout):
-    workout_icon = WORKOUT_ICONS.get(workout.type, DEFAULT_ICON)
-    click.echo("Workout details")
-    click.echo(f"Id: {workout.id}")
-    click.echo(f"Sport: {workout.type} {workout_icon}")
-    click.echo(f"Date: {workout.datetime.date().strftime("%Y-%m-%d (%a)")}")
-    click.echo(
-        f"Start coordinates: {round(workout.start_lat, 1)},"
-        f" {round(workout.start_lon, 1)}"
-    )
-    click.echo(f"Start time: {workout.datetime.time().strftime("%H:%M")}")
-    click.echo(f"Moving time: {dt.timedelta(seconds=workout.moving_time_sec)}")
-    click.echo(f"Distance: {workout.distance_km}km")
-    click.echo(f"Elevation: {workout.elevation_m}m (grade: {workout.grade}%)")
-    if workout.type == ["cycling", "Canoeing"]:
-        click.echo(f"Average speed: 60 / {round(workout.pace_min_km, 1)}")
-    else:
-        click.echo(
-            f"Average pace: {dt.timedelta(minutes=workout.pace_min_km)}"
+def render_workout_details(workout: Workout) -> None:
+    console = Console()
+    header = Panel(
+        Text(
+            f"{workout.type.title()} - {workout.datetime:%Y-%m-%d (%a) %H:%M}"
         )
+    )
+
+    overview = Panel(
+        (
+            f"ID: {workout.id}\n"
+            f"Distance: {workout.distance_km:.2f} km\n"
+            f"Moving time: {dt.timedelta(seconds=workout.moving_time_sec)}\n"
+            f"Starting location: {workout.start_lat:.5f}°N, "
+            f"{workout.start_lon:.5f}°E\n"
+        ),
+        title="Overview",
+    )
+
+    perf_metric = "pace" if workout.type == "running" else "speed"
+    perf_value = (
+        format_pace(workout.pace_min_km)
+        if workout.type == "running"
+        else round(60 / workout.pace_min_km, 1)
+    )
+    perf_unit = "min/km" if workout.type == "running" else "km/h"
+
+    performance = Panel(
+        (
+            f"Elevation gain: {workout.elevation_m}m\n"
+            f"Average grade: {workout.grade}%\n"
+            f"Average {perf_metric}: {perf_value}{perf_unit}"
+        ),
+        title="Performance",
+    )
+
+    console.print(header)
+    console.print(Columns([overview, performance]))
