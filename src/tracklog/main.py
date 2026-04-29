@@ -1,12 +1,14 @@
 import click
-from tracklog.db.engine import create_tables, Session
+from rich.console import Console
+from tracklog.db.engine import create_tables, Session, engine
 from tracklog.db.repo import WorkoutRepo
+from tracklog.db.util import is_db_initialized
 from tracklog.cli.render import (
     render_workout_list,
     render_workout_details,
     render_stats_table,
 )
-from tracklog.cli.log import log_workout_from_file
+from tracklog.cli.log import log_workout_from_path
 
 
 @click.group()
@@ -18,15 +20,19 @@ def cli():
 @cli.command("init-db")
 def init_database():
     """Initialize database"""
-    create_tables()
-    click.echo("Database created")
+    console = Console()
+    if is_db_initialized(engine):
+        console.print("[yellow]Database schema already exists.[/]")
+    else:
+        create_tables()
+        console.print("[green]Database created[/]")
 
 
 @cli.command("log")
 @click.argument("path")
 def log(path: str):
     """Log workout(s) from GPX file or folder containing GPX files"""
-    log_workout_from_file(path)
+    log_workout_from_path(path)
 
 
 @cli.command()
