@@ -2,14 +2,59 @@ import math
 import gpxpy
 from pathlib import Path
 from tracklog.db.models import Workout
-
+from typing import List
 
 SPORTS_WITH_ELEVATION = ["running", "hiking", "walking", "cycling"]
 
 
+class InvalidPathError(ValueError):
+    """Exception raised for invalid path"""
+
+    pass
+
+
+class EmptyGPXError(ValueError):
+    """Exception raised if GPX file doesn't contain tracks"""
+
+    pass
+
+
+def process_path(path: Path) -> List[Workout]:
+    """Parse gpx files located in path.
+
+    Args:
+        path (Path): path to file or directory containing gpx files
+
+    Raises:
+        InvalidPathError: if path is neither directory nor gpx file
+
+    Returns:
+        List[Workout]: list of Workout instances
+    """
+    if path.is_dir():
+        return process_dir(path)
+    elif path.is_file() and path.suffix == ".gpx":
+        return [parse_gpx(path)]
+    else:
+        raise InvalidPathError(
+            "Invalid path. Please provide a path to a .gpx file or a directory containing .gpx files"
+        )
+
+
 def parse_gpx(file_path: Path) -> Workout:
+    """Parse GPX file.
+
+    Args:
+        file_path (Path): path to GPX file
+
+    Returns:
+        Workout: instance of Workout class that contains information about workout
+    """
     with open(file_path, "r") as file:
         gpx = gpxpy.parse(file)
+
+    if not gpx.tracks:
+        raise EmptyGPXError("No GPX tracks found")
 
     workout_data = {}
     workout_data["type"] = gpx.tracks[0].type
@@ -39,14 +84,26 @@ def parse_gpx(file_path: Path) -> Workout:
 
 
 def process_dir(dir_path: Path) -> list[Workout]:
+    """Parse all GPX files inside a directory or its subdirectories
+
+    Args:
+        dir_path (Path): path to directory containing GPX files
+
+    Returns:
+        list[Workout]: list of Workout instances containing information about workouts
+    """
     parsed_workouts = []
     print(f"Processing directory: {dir_path}")
     for subpath in dir_path.iterdir():
         if subpath.is_dir():
             parsed_workouts.extend(process_dir(subpath))
         elif subpath.is_file() and subpath.suffix == ".gpx":
-            print(f"Parsing: {subpath}")
-            parsed_workouts.append(parse_gpx(subpath))
+            try:
+                print(f"Parsing: {subpath}")
+                parsed_workouts.append(parse_gpx(subpath))
+            except Exception:
+                print(f"Error parsing - Skipping file: {subpath}")
+                continue
         else:
             print(f"Skipping file: {subpath}")
             continue

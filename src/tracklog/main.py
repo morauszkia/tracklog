@@ -21,11 +21,14 @@ def cli():
 def init_database():
     """Initialize database"""
     console = Console()
-    if is_db_initialized(engine):
-        console.print("[yellow]Database schema already exists.[/]")
-    else:
-        create_tables()
-        console.print("[green]Database created[/]")
+    try:
+        if is_db_initialized(engine):
+            console.print("[yellow]Database schema already exists.[/]")
+        else:
+            create_tables()
+            console.print("[green]Database created[/]")
+    except Exception as e:
+        raise click.ClickException(str(e))
 
 
 @cli.command("log")
@@ -76,6 +79,7 @@ def stats(period):
 @cli.command()
 @click.argument("id")
 def show(id: str):
+    """Show details of selected workout"""
     repo = WorkoutRepo(Session)
     workout = repo.get_workout(id)
     render_workout_details(workout)
