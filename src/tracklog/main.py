@@ -48,17 +48,20 @@ def log(path: str):
 )
 def list(limit: int):
     """List recent workouts"""
-    repo = WorkoutRepo(Session)
-    workouts = repo.list_all(limit)
+    try:
+        repo = WorkoutRepo(Session)
+        workouts = repo.list_all(limit)
 
-    if not workouts:
-        click.echo(
-            "No workouts logged yet. Try logging some with 'tracklog log'"
-        )
-        return
+        if not workouts:
+            Console().print(
+                "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
+            )
+            return
 
-    render_workout_list(workouts)
-    click.echo(f"{len(workouts)} workouts listed")
+        render_workout_list(workouts)
+        click.echo(f"{len(workouts)} workouts listed")
+    except Exception as e:
+        raise click.ClickException(str(e))
 
 
 @cli.command()
@@ -71,15 +74,28 @@ def list(limit: int):
 )
 def stats(period):
     """Calculate statistics for provided PERIOD"""
-    repo = WorkoutRepo(Session)
-    stats = repo.stats(period)
-    render_stats_table(stats, period)
+    try:
+        repo = WorkoutRepo(Session)
+        stats = repo.stats(period)
+        if not stats:
+            Console().print(
+                "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
+            )
+            return
+        render_stats_table(stats, period)
+    except Exception as e:
+        raise click.ClickException(str(e))
 
 
 @cli.command()
 @click.argument("id")
 def show(id: str):
     """Show details of selected workout"""
-    repo = WorkoutRepo(Session)
-    workout = repo.get_workout(id)
-    render_workout_details(workout)
+    try:
+        repo = WorkoutRepo(Session)
+        workout = repo.get_workout(id)
+        if not workout:
+            raise click.ClickException(f"No workout found for id {id}")
+        render_workout_details(workout)
+    except Exception as e:
+        raise click.ClickException(str(e))

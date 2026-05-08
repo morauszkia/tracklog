@@ -2,12 +2,21 @@ from click import ClickException
 from pathlib import Path
 from rich.console import Console
 from gpxpy.gpx import GPXException
+from typing import List
 from tracklog.core.gpx_parser import (
     process_path,
     InvalidPathError,
     EmptyGPXError,
 )
-from tracklog.services.db import record_workouts
+from tracklog.db.engine import Session
+from tracklog.db.models import Workout
+from tracklog.db.repo import WorkoutRepo
+
+
+def record_workouts(workouts: List[Workout]):
+    repo = WorkoutRepo(Session)
+    for workout in workouts:
+        repo.add(workout)
 
 
 def log_workout_from_path(path: str):
