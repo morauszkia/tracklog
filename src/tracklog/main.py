@@ -9,6 +9,7 @@ from tracklog.cli.render import (
     render_stats_table,
 )
 from tracklog.cli.log import log_workout_from_path
+from tracklog.cli.decorators import handle_db_errors
 
 
 @click.group()
@@ -18,20 +19,19 @@ def cli():
 
 
 @cli.command("init-db")
+@handle_db_errors
 def init_database():
     """Initialize database"""
     console = Console()
-    try:
-        if is_db_initialized(engine):
-            console.print("[yellow]Database schema already exists.[/]")
-        else:
-            create_tables()
-            console.print("[green]Database created[/]")
-    except Exception as e:
-        raise click.ClickException(str(e))
+    if is_db_initialized(engine):
+        console.print("[yellow]Database schema already exists.[/]")
+    else:
+        create_tables()
+        console.print("[green]Database created[/]")
 
 
 @cli.command("log")
+@handle_db_errors
 @click.argument("path")
 def log(path: str):
     """Log workout(s) from GPX file or folder containing GPX files"""
@@ -39,6 +39,7 @@ def log(path: str):
 
 
 @cli.command()
+@handle_db_errors
 @click.option(
     "--limit",
     "-l",
@@ -48,23 +49,21 @@ def log(path: str):
 )
 def list(limit: int):
     """List recent workouts"""
-    try:
-        repo = WorkoutRepo(Session)
-        workouts = repo.list_all(limit)
+    repo = WorkoutRepo(Session)
+    workouts = repo.list_all(limit)
 
-        if not workouts:
-            Console().print(
-                "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
-            )
-            return
+    if not workouts:
+        Console().print(
+            "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
+        )
+        return
 
-        render_workout_list(workouts)
-        click.echo(f"{len(workouts)} workouts listed")
-    except Exception as e:
-        raise click.ClickException(str(e))
+    render_workout_list(workouts)
+    click.echo(f"{len(workouts)} workouts listed")
 
 
 @cli.command()
+@handle_db_errors
 @click.option(
     "--period",
     "-p",
@@ -74,28 +73,23 @@ def list(limit: int):
 )
 def stats(period):
     """Calculate statistics for provided PERIOD"""
-    try:
-        repo = WorkoutRepo(Session)
-        stats = repo.stats(period)
-        if not stats:
-            Console().print(
-                "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
-            )
-            return
-        render_stats_table(stats, period)
-    except Exception as e:
-        raise click.ClickException(str(e))
+    repo = WorkoutRepo(Session)
+    stats = repo.stats(period)
+    if not stats:
+        Console().print(
+            "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
+        )
+        return
+    render_stats_table(stats, period)
 
 
 @cli.command()
+@handle_db_errors
 @click.argument("id")
 def show(id: str):
     """Show details of selected workout"""
-    try:
-        repo = WorkoutRepo(Session)
-        workout = repo.get_workout(id)
-        if not workout:
-            raise click.ClickException(f"No workout found for id {id}")
-        render_workout_details(workout)
-    except Exception as e:
-        raise click.ClickException(str(e))
+    repo = WorkoutRepo(Session)
+    workout = repo.get_workout(id)
+    if not workout:
+        raise click.ClickException(f"No workout found for id {id}")
+    render_workout_details(workout)

@@ -45,5 +45,3 @@ def log_workout_from_path(path: str):
         raise ClickException(f"GPX parsing error: {str(e)}")
     except EmptyGPXError as e:
         raise ClickException(f"GPX parsing error: {str(e)}")
-    except Exception as e:
-        raise ClickException(f"Unexpected error: {str(e)}")
