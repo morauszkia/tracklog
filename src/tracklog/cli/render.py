@@ -16,10 +16,11 @@ WORKOUT_ICONS = {
     "Canoeing": "🚣",
 }
 
-DEFAULT_ICON = "🤸‍♀️"
+DEFAULT_ICON = "🤸"
 
 
 def format_pace(pace_min: float):
+    """Formats pace provided in minutes in 'M:SS' format"""
     seconds = int(pace_min * 60)
     minutes = seconds // 60
     seconds = minutes % 60
@@ -27,6 +28,7 @@ def format_pace(pace_min: float):
 
 
 def render_workout_list(workouts: List[Workout]) -> None:
+    """Renders a table of recent workouts"""
     console = Console()
     table = Table(title="YOUR WORKOUTS", box=box.ROUNDED)
     table.add_column("📅")
@@ -54,6 +56,7 @@ def render_workout_list(workouts: List[Workout]) -> None:
 
 
 def render_stats_table(stats: List[Dict], period: str) -> None:
+    """Renders a stats table by workout type"""
     console = Console()
     table = Table(
         title=f"STATS FOR PERIOD: {period.upper()}",
@@ -89,6 +92,7 @@ def render_stats_table(stats: List[Dict], period: str) -> None:
 
 
 def render_workout_details(workout: Workout) -> None:
+    """Renders detailed information about a workout"""
     console = Console()
     header = Panel(
         Text(
@@ -126,3 +130,13 @@ def render_workout_details(workout: Workout) -> None:
 
     console.print(header)
     console.print(Columns([overview, performance]))
+
+
+def render_workout_concise(workout: Workout):
+    """Renders concise information about workout"""
+    description = (
+        f"{workout.type} 📅 {workout.datetime.date().strftime("%Y-%m-%d (%a)")}"
+        f" 🕓 {workout.datetime.time().strftime("%H:%M")} - "
+        f"{workout.distance_km}km ({workout.elevation_m}+)"
+    )
+    Console().print(description)
