@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from sqlalchemy import select, func
+from sqlalchemy import select, delete, func
 from sqlalchemy.orm import Session
 from typing import List, Dict
 from tracklog.db.models import Workout
@@ -15,6 +15,16 @@ class WorkoutRepo:
         session = self.session_maker()
         try:
             session.add(workout)
+            session.commit()
+        finally:
+            session.close()
+
+    def delete(self, id: uuid) -> None:
+        """Delete workout from database"""
+        session = self.session_maker()
+        try:
+            stmt = delete(Workout).where(Workout.id == id)
+            session.execute(stmt)
             session.commit()
         finally:
             session.close()
