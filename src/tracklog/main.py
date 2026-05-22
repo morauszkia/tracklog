@@ -45,17 +45,22 @@ def log(path: str):
 def delete(id: str):
     """Delete workout with ID"""
     repo = WorkoutRepo(Session)
-    workout = repo.get_workout(id)
-    if not workout:
-        raise click.ClickException(f"No workout found for id: {id}")
-    click.echo("You are about to delete the following workout:")
-    render_workout_concise(workout)
-    confirmation = click.confirm(
-        "Are you sure?", default=True, prompt_suffix=" "
-    )
-    if confirmation:
-        repo.delete(workout.id)
-        Console().print("[green]Workout deleted[/]")
+    try:
+        workout = repo.get_workout(id)
+        if not workout:
+            raise click.ClickException(f"No workout found for id: {id}")
+        click.echo("You are about to delete the following workout:")
+        render_workout_concise(workout)
+        confirmation = click.confirm(
+            "You cannot undo this action! Are you sure?",
+            default=True,
+            prompt_suffix=" ",
+        )
+        if confirmation:
+            repo.delete(workout.id)
+            Console().print("[green]Workout deleted[/]")
+    except ValueError as e:
+        raise click.ClickException(str(e))
 
 
 @cli.command()
