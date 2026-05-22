@@ -37,7 +37,8 @@ def process_path(path: Path) -> List[Workout]:
         return [parse_gpx(path)]
     else:
         raise InvalidPathError(
-            "Invalid path. Please provide a path to a .gpx file or a directory containing .gpx files"
+            "Invalid path. Please provide a path to a .gpx file "
+            "or a directory containing .gpx files"
         )
 
 
@@ -48,7 +49,8 @@ def parse_gpx(file_path: Path) -> Workout:
         file_path (Path): path to GPX file
 
     Returns:
-        Workout: instance of Workout class that contains information about workout
+        Workout:    instance of Workout class
+                    that contains information about workout
     """
     with open(file_path, "r") as file:
         gpx = gpxpy.parse(file)
@@ -58,6 +60,8 @@ def parse_gpx(file_path: Path) -> Workout:
 
     workout_data = {}
     workout_data["type"] = gpx.tracks[0].type
+    if workout_data["type"] == "trail_running":
+        workout_data["type"] = "running"
     workout_data["datetime"] = gpx.get_time_bounds().start_time
     start_coordinates = gpx.get_location_at(workout_data["datetime"])[0]
     workout_data["start_lat"] = start_coordinates.latitude
@@ -90,7 +94,8 @@ def process_dir(dir_path: Path) -> list[Workout]:
         dir_path (Path): path to directory containing GPX files
 
     Returns:
-        list[Workout]: list of Workout instances containing information about workouts
+        list[Workout]:  list of Workout instances containing information
+                        about workouts
     """
     parsed_workouts = []
     print(f"Processing directory: {dir_path}")
