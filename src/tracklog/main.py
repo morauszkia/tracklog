@@ -7,6 +7,7 @@ from tracklog.cli.render import (
     render_workout_list,
     render_workout_details,
     render_stats_table,
+    render_workout_concise,
 )
 from tracklog.cli.log import log_workout_from_path
 from tracklog.cli.decorators import handle_db_errors
@@ -38,6 +39,25 @@ def log(path: str):
     log_workout_from_path(path)
 
 
+@cli.command("delete")
+@handle_db_errors
+@click.argument("id")
+def delete(id: str):
+    """Delete workout with ID"""
+    repo = WorkoutRepo(Session)
+    workout = repo.get_workout(id)
+    if not workout:
+        raise click.ClickException(f"No workout found for id: {id}")
+    click.echo("You are about to delete the following workout:")
+    render_workout_concise(workout)
+    confirmation = click.confirm(
+        "Are you sure?", default=True, prompt_suffix=" "
+    )
+    if confirmation:
+        repo.delete(workout.id)
+        Console().print("[green]Workout deleted[/]")
+
+
 @cli.command()
 @handle_db_errors
 @click.option(
@@ -54,7 +74,8 @@ def list(limit: int):
 
     if not workouts:
         Console().print(
-            "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
+            "[yellow]No workouts logged yet. "
+            "Try logging some with 'tracklog log'[/]"
         )
         return
 
@@ -77,7 +98,8 @@ def stats(period):
     stats = repo.stats(period)
     if not stats:
         Console().print(
-            "[yellow]No workouts logged yet. Try logging some with 'tracklog log'[/]"
+            "[yellow]No workouts logged yet. "
+            "Try logging some with 'tracklog log'[/]"
         )
         return
     render_stats_table(stats, period)
