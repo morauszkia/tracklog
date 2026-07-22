@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx creator="StravaGPX" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <metadata>
+  <time>2026-07-10T06:21:32Z</time>
+ </metadata>
+ <trk>
+  <name>Morning Walk</name>
+  <type>walking</type>
+  <trkseg>
+   <trkpt lat="147.6738810" lon="19.0679820">
+    <ele>143.7</ele>
+    <time>2026-07-10T06:21:32Z</time>
+   </trkpt>
+   <trkpt lat="47.6737960" lon="219.0678810">
+    <ele>142.4</ele>
+    <time>2026-07-10T06:21:38Z</time>
+   </trkpt>
+   <trkpt lat="47.6736910" lon="19.0677960">
+    <ele>141.3</ele>
+    <time>2026-07-10T06:21:42Z</time>
+   </trkpt>
+   <trkpt lat="47.6736020" lon="19.0677030">
+    <ele>140.5</ele>
+    <time>2026-07-10T06:21:46Z</time>
+   </trkpt>
+  </trkseg>
+ </trk>
+</gpx>
